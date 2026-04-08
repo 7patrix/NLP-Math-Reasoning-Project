@@ -30,7 +30,7 @@ def extract_math_answer(text: str) -> str:
 
 
 def load_math500() -> List[Dict]:
-    """Load MATH-500 dataset from local file or Hugging Face."""
+    """Load MATH-500 dataset from local file or public Hugging Face split."""
     local_path = _get_data_path("MATH-500", "test.json")
     if os.path.exists(local_path):
         with open(local_path, 'r', encoding='utf-8') as f:
@@ -40,21 +40,25 @@ def load_math500() -> List[Dict]:
                     item['answer'] = extract_math_answer(item['solution'])
             return data
 
-    # Fallback: try loading from Hugging Face
+    # Fallback: use public MATH-500 split from Hugging Face
     try:
         from datasets import load_dataset
-        dataset = load_dataset("hendrycks/competition_math", split="test")
+        dataset = load_dataset("HuggingFaceH4/MATH-500", split="test")
         samples = []
         for item in dataset:
+            problem = item.get("problem") or item.get("question")
+            answer = item.get("answer") or item.get("final_answer") or item.get("expected_answer")
+            if not problem or not answer:
+                continue
             samples.append({
-                "problem": item["problem"],
-                "answer": extract_math_answer(item["solution"]),
+                "problem": str(problem).strip(),
+                "answer": str(answer).strip(),
                 "level": item.get("level", ""),
                 "type": item.get("type", "")
             })
-        return samples[:500]
+        return samples
     except Exception as e:
-        print(f"[WARNING] Could not load MATH-500 from HuggingFace: {e}")
+        print(f"[WARNING] Could not load public MATH-500 split from HuggingFace: {e}")
         print("[WARNING] Please run: python scripts/download_data.py")
         return []
 
@@ -96,7 +100,7 @@ def load_gsm8k() -> List[Dict]:
 
 
 def load_aime2024() -> List[Dict]:
-    """Load AIME 2024 problems from local file."""
+    """Load AIME 2024 from local file or public Hugging Face split."""
     local_path = _get_data_path("AIME-2024", "aime2024.json")
     if os.path.exists(local_path):
         with open(local_path, 'r', encoding='utf-8') as f:
@@ -117,19 +121,41 @@ def load_aime2024() -> List[Dict]:
             answer = str(item.get("answer", "")).strip()
             if not problem or not answer:
                 invalid_indices.append(idx)
+                continue
+
+            year = str(item.get("year", "")).strip()
+            if year and year != "2024":
+                invalid_indices.append(idx)
 
         if invalid_indices:
             preview = ", ".join(str(i) for i in invalid_indices[:10])
             raise RuntimeError(
-                "Invalid AIME-2024 samples found (missing/empty 'problem' or 'answer') "
+                "Invalid AIME-2024 samples found (missing/empty fields or non-2024 year) "
                 f"at indices: {preview}."
             )
 
         return data
 
-    print(f"[WARNING] AIME-2024 data not found at {local_path}")
-    print("[WARNING] Please download manually and place at data/AIME-2024/aime2024.json")
-    return []
+    # Fallback: use public AIME-2024 split from Hugging Face
+    try:
+        from datasets import load_dataset
+        dataset = load_dataset("HuggingFaceH4/aime_2024", split="train")
+        samples = []
+        for item in dataset:
+            problem = item.get("problem")
+            answer = item.get("answer")
+            if not problem or not answer:
+                continue
+            samples.append({
+                "problem": str(problem).strip(),
+                "answer": str(answer).strip(),
+                "year": str(item.get("year", "2024")).strip() or "2024",
+            })
+        return samples
+    except Exception as e:
+        print(f"[WARNING] Could not load public AIME-2024 split from HuggingFace: {e}")
+        print("[WARNING] Please run: python scripts/download_data.py")
+        return []
 
 
 def load_dataset_by_name(name: str) -> List[Dict]:

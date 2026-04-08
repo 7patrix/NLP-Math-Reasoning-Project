@@ -8,16 +8,16 @@
 ## 📋 项目概述
 
 ### 任务目标
-评估大语言模型（Qwen2.5-Math-1.5B 和 DeepSeek-R1-Distill-Qwen-1.5B）在数学推理任务上的表现，系统对比三种提示工程方法的效果。
+评估大语言模型（Qwen2.5-Math-1.5B 和 DeepSeek-R1-Qwen-1.5B）在数学推理任务上的表现，系统对比三种提示工程方法的效果。
 
 ### 实验配置（18组实验）
 
 | 模型 | 数据集 | 方法 |
 |------|--------|------|
 | Qwen2.5-Math-1.5B | GSM8K, MATH-500, AIME-2024 | CoT, Self-Refine, Self-Consistency |
-| DeepSeek-R1-Distill-Qwen-1.5B | GSM8K, MATH-500, AIME-2024 | CoT, Self-Refine, Self-Consistency |
+| DeepSeek-R1-Qwen-1.5B | GSM8K, MATH-500, AIME-2024 | CoT, Self-Refine, Self-Consistency |
 
-> 说明：命令行中的模型键仍使用 `deepseek-r1-qwen-1.5b`，其实际对应的 Hugging Face 模型为 `deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B`。
+> 说明：命令行中的模型键使用 `deepseek-r1-qwen-1.5b`，其对应的 Hugging Face 模型为 `deepseek-ai/DeepSeek-R1-Qwen-1.5B`。
 
 ### 评估指标
 - **Accuracy**: 准确率（模型答案与标准答案匹配率）
@@ -83,9 +83,9 @@ pip install -r requirements.txt
 python scripts/download_data.py
 ```
 
-> 当前实现中，`scripts/download_data.py` 会从 `hendrycks/competition_math` 的 test split 下载数据，并取前 500 条写入 `data/MATH-500/test.json`。
+> 当前实现中，`scripts/download_data.py` 会从公开切分 `HuggingFaceH4/MATH-500` 的 `test` split 下载并写入 `data/MATH-500/test.json`。
 
-> AIME-2024 数据已放在 `data/AIME-2024/aime2024.json`，无需下载。
+> AIME-2024 使用公开数据集 `HuggingFaceH4/aime_2024`（`train` split，30题），并由 `scripts/download_data.py` 自动写入 `data/AIME-2024/aime2024.json`。
 
 ### 3. 设置模型缓存（重要！）
 
@@ -162,15 +162,15 @@ python -m streamlit run app.py
 | 7 | Qwen2.5-Math-1.5B | AIME-2024 | CoT | ~1min | ⏳ |
 | 8 | Qwen2.5-Math-1.5B | AIME-2024 | Self-Refine | ~2min | ⏳ |
 | 9 | Qwen2.5-Math-1.5B | AIME-2024 | Self-Consistency | ~5min | ⏳ |
-| 10 | DeepSeek-R1-Distill-Qwen-1.5B | GSM8K | CoT | ~40min | ⏳ |
-| 11 | DeepSeek-R1-Distill-Qwen-1.5B | GSM8K | Self-Refine | ~80min | ⏳ |
-| 12 | DeepSeek-R1-Distill-Qwen-1.5B | GSM8K | Self-Consistency | ~200min | ⏳ |
-| 13 | DeepSeek-R1-Distill-Qwen-1.5B | MATH-500 | CoT | ~15min | ⏳ |
-| 14 | DeepSeek-R1-Distill-Qwen-1.5B | MATH-500 | Self-Refine | ~30min | ⏳ |
-| 15 | DeepSeek-R1-Distill-Qwen-1.5B | MATH-500 | Self-Consistency | ~75min | ⏳ |
-| 16 | DeepSeek-R1-Distill-Qwen-1.5B | AIME-2024 | CoT | ~1min | ⏳ |
-| 17 | DeepSeek-R1-Distill-Qwen-1.5B | AIME-2024 | Self-Refine | ~2min | ⏳ |
-| 18 | DeepSeek-R1-Distill-Qwen-1.5B | AIME-2024 | Self-Consistency | ~5min | ⏳ |
+| 10 | DeepSeek-R1-Qwen-1.5B | GSM8K | CoT | ~40min | ⏳ |
+| 11 | DeepSeek-R1-Qwen-1.5B | GSM8K | Self-Refine | ~80min | ⏳ |
+| 12 | DeepSeek-R1-Qwen-1.5B | GSM8K | Self-Consistency | ~200min | ⏳ |
+| 13 | DeepSeek-R1-Qwen-1.5B | MATH-500 | CoT | ~15min | ⏳ |
+| 14 | DeepSeek-R1-Qwen-1.5B | MATH-500 | Self-Refine | ~30min | ⏳ |
+| 15 | DeepSeek-R1-Qwen-1.5B | MATH-500 | Self-Consistency | ~75min | ⏳ |
+| 16 | DeepSeek-R1-Qwen-1.5B | AIME-2024 | CoT | ~1min | ⏳ |
+| 17 | DeepSeek-R1-Qwen-1.5B | AIME-2024 | Self-Refine | ~2min | ⏳ |
+| 18 | DeepSeek-R1-Qwen-1.5B | AIME-2024 | Self-Consistency | ~5min | ⏳ |
 
 > **总计**: ~5.5小时（串行）。建议晚上挂机运行，或两台机器分别跑 Qwen / DeepSeek。
 >

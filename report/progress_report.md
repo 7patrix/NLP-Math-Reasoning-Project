@@ -20,15 +20,15 @@ The project objectives are:
 ### 2.1 Models
 
 - Qwen2.5-Math-1.5B
-- DeepSeek-R1-Distill-Qwen-1.5B
+- DeepSeek-R1-Qwen-1.5B
 
-Implementation note: the CLI model key `deepseek-r1-qwen-1.5b` maps to Hugging Face model `deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B` in the current codebase.
+Implementation note: the CLI model key `deepseek-r1-qwen-1.5b` maps to Hugging Face model `deepseek-ai/DeepSeek-R1-Qwen-1.5B` in the current codebase.
 
 ### 2.2 Datasets
 
 - GSM8K test set (~1319 samples), downloaded and normalized via script.
-- MATH-500 (500 samples), currently constructed by downloading `hendrycks/competition_math` test split and taking the first 500 samples.
-- AIME-2024 (30 samples), manually provided local JSON file in `data/AIME-2024/aime2024.json`.
+- MATH-500 (500 samples), loaded from the public split `HuggingFaceH4/MATH-500` (test split).
+- AIME-2024 (30 samples), sourced from public split `HuggingFaceH4/aime_2024` and stored in `data/AIME-2024/aime2024.json`.
 
 ### 2.3 Prompt Methods
 
