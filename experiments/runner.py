@@ -6,8 +6,14 @@ import json
 import os
 import re
 import sys
+import time
+import random
 from pathlib import Path
+from datetime import datetime
 from typing import Dict, List
+
+import numpy as np
+import torch
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -46,6 +52,7 @@ def run_experiment(
     output_file: str = None,
     limit: int = None,
     skip_existing: bool = True,
+    seed: int = 42,
 ) -> Dict:
     """
     Run a single experiment.
@@ -57,6 +64,7 @@ def run_experiment(
         output_file: Path to save results. Auto-generated if None.
         limit: Limit number of samples for quick testing
         skip_existing: If True and output_file exists, skip running and load from disk
+        seed: Global random seed for reproducibility
 
     Returns:
         Dict with results and metrics
@@ -83,6 +91,16 @@ def run_experiment(
     print(f"Running: {model_name} + {dataset_name} + {prompt_method}")
     print(f"Output: {output_file}")
     print(f"{'='*60}\n")
+
+    run_start = time.time()
+    run_start_iso = datetime.now().isoformat(timespec="seconds")
+
+    # Set global random seeds for reproducible runs.
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
 
     # Validate prompt method
     if prompt_method not in PROMPT_METHODS:
@@ -113,7 +131,10 @@ def run_experiment(
         answer = sample["answer"]
 
         try:
-            prediction = prompt_fn(model, tokenizer, problem)
+            if prompt_method == "self_consistency":
+                prediction = prompt_fn(model, tokenizer, problem, dataset_type=dataset_name)
+            else:
+                prediction = prompt_fn(model, tokenizer, problem)
             predictions.append(prediction)
         except Exception as e:
             print(f"[WARN] Error on sample: {e}")
@@ -124,10 +145,34 @@ def run_experiment(
     # Evaluate
     metrics = evaluate_all(predictions, references, dataset_type=dataset_name)
 
+    duration_seconds = time.time() - run_start
+
+    if prompt_method == "self_consistency":
+        decoding = {
+            "do_sample": True,
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "num_samples": 5,
+        }
+    else:
+        decoding = {
+            "do_sample": False,
+            "temperature": None,
+            "top_p": None,
+        }
+
     results = {
         "model": model_name,
         "dataset": dataset_name,
         "prompt_method": prompt_method,
+        "run_metadata": {
+            "seed": seed,
+            "started_at": run_start_iso,
+            "duration_seconds": round(duration_seconds, 2),
+            "device": str(getattr(model, "device", "unknown")),
+            "decode_config": decoding,
+            "max_new_tokens": 1024,
+        },
         "metrics": metrics,
         "samples": [
             {"problem": d["problem"], "prediction": p, "reference": r}
@@ -145,6 +190,8 @@ def run_experiment(
     print(f"{'='*60}")
     print(f"Accuracy: {metrics['accuracy']:.4f}")
     print(f"Avg Response Length: {metrics['response_length']['char_mean']:.1f} chars")
+    print(f"Duration: {duration_seconds:.1f}s")
+    print(f"Seed: {seed}")
     print(f"{'='*60}\n")
 
     return results
@@ -201,6 +248,8 @@ Examples:
                         help="Output file path")
     parser.add_argument("--no-skip", action="store_true",
                         help="Re-run even if results file already exists")
+    parser.add_argument("--seed", type=int, default=42,
+                        help="Global random seed for reproducible runs")
     parser.add_argument("--all", action="store_true")
 
     args = parser.parse_args()
@@ -215,4 +264,5 @@ Examples:
             output_file=args.output,
             limit=args.limit,
             skip_existing=not args.no_skip,
+            seed=args.seed,
         )

@@ -26,12 +26,34 @@ def extract_final_answer(text: str, dataset_type: str = None) -> str:
     if not text:
         return ""
 
+    dataset_key = (dataset_type or "").lower().replace("-", "").replace("_", "")
+
     # --- 1. Try boxed answer (LaTeX) ---
     boxed_match = re.search(r'\\boxed\{([^{}]+)\}', text)
     if boxed_match:
         return boxed_match.group(1).strip()
 
-    # --- 2. Try "answer is X" / "answer: X" patterns ---
+    # --- 2. Prefer the last explicit final-answer declaration ---
+    final_answer_matches = re.findall(
+        r'(?:final\s+voted\s+answer|final\s+answer|the\s+answer\s+is|answer\s*:)\s*([^\n.]+)',
+        text,
+        re.IGNORECASE,
+    )
+    if final_answer_matches:
+        return final_answer_matches[-1].strip()
+
+    # --- 3. Dataset-specific extraction ---
+    if dataset_key.startswith("gsm8k"):
+        gsm8k_match = re.search(r'####\s*([^\n]+)', text)
+        if gsm8k_match:
+            return gsm8k_match.group(1).strip()
+
+    if dataset_key.startswith("aime"):
+        aime_match = re.search(r'\b(\d{1,3})\b\s*$', text.strip())
+        if aime_match:
+            return aime_match.group(1)
+
+    # --- 4. Try "answer is X" / "answer: X" patterns ---
     answer_match = re.search(
         r'(?:the\s+)?answer\s+is\s*[:\s]*([^\n.]+)',
         text, re.IGNORECASE
@@ -39,22 +61,17 @@ def extract_final_answer(text: str, dataset_type: str = None) -> str:
     if answer_match:
         return answer_match.group(1).strip()
 
-    # --- 3. Try "= number" pattern ---
-    equals_match = re.search(r'=\s*(-?[\d]+\.?[\d]*)', text)
-    if equals_match:
-        return equals_match.group(1)
+    # --- 5. Prefer the last equation result instead of first ---
+    equals_matches = re.findall(r'=\s*(-?[\d]+\.?[\d]*)', text)
+    if equals_matches:
+        return equals_matches[-1]
 
-    # --- 4. Try "#### number" (GSM8K format) ---
-    gsm8k_match = re.search(r'####\s*([^\n]+)', text)
-    if gsm8k_match:
-        return gsm8k_match.group(1).strip()
-
-    # --- 5. Try number at end of text (after punctuation) ---
+    # --- 6. Try number at end of text (after punctuation) ---
     end_number_match = re.search(r'[.,;:]\s*(-?[\d]+\.?[\d]*)\s*$', text.strip())
     if end_number_match:
         return end_number_match.group(1)
 
-    # --- 6. Try last standalone number ---
+    # --- 7. Try last standalone number ---
     numbers = re.findall(r'-?[\d]+\.?[\d]*', text)
     if numbers:
         return numbers[-1]
@@ -96,6 +113,17 @@ def normalize_answer(answer: str) -> str:
             answer = str(float(num) / float(denom))
         except (ValueError, ZeroDivisionError):
             pass
+
+    # Canonicalize numeric strings to avoid mismatches like "025" vs "25".
+    if re.fullmatch(r'-?\d+', answer):
+        try:
+            answer = str(int(answer))
+        except ValueError:
+            pass
+    elif re.fullmatch(r'-?\d+\.\d+', answer):
+        answer = answer.rstrip('0').rstrip('.')
+        if answer in {"", "-0"}:
+            answer = "0"
 
     return answer.lower().strip()
 

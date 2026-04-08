@@ -121,7 +121,15 @@ def load_model(model_key: str, use_local: bool = True):
     return model, tokenizer
 
 
-def generate_response(model, tokenizer, prompt: str, max_new_tokens: int = 1024, temperature: float = 0.7, top_p: float = 0.9) -> str:
+def generate_response(
+    model,
+    tokenizer,
+    prompt: str,
+    max_new_tokens: int = 1024,
+    temperature: float = 0.7,
+    top_p: float = 0.9,
+    do_sample: bool = True,
+) -> str:
     """
     Generate response from model.
 
@@ -130,21 +138,27 @@ def generate_response(model, tokenizer, prompt: str, max_new_tokens: int = 1024,
         tokenizer: The tokenizer
         prompt: Input prompt
         max_new_tokens: Maximum tokens to generate
-        temperature: Sampling temperature
-        top_p: Nucleus sampling parameter
+        temperature: Sampling temperature (used when do_sample=True)
+        top_p: Nucleus sampling parameter (used when do_sample=True)
+        do_sample: Whether to use stochastic sampling
 
     Returns:
         Generated text
     """
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
+    generate_kwargs = {
+        "max_new_tokens": max_new_tokens,
+        "do_sample": do_sample,
+        "pad_token_id": tokenizer.eos_token_id,
+    }
+    if do_sample:
+        generate_kwargs["temperature"] = temperature
+        generate_kwargs["top_p"] = top_p
+
     outputs = model.generate(
         **inputs,
-        max_new_tokens=max_new_tokens,
-        do_sample=True,
-        temperature=temperature,
-        top_p=top_p,
-        pad_token_id=tokenizer.eos_token_id
+        **generate_kwargs,
     )
 
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)

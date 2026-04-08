@@ -33,7 +33,7 @@ def load_math500() -> List[Dict]:
     """Load MATH-500 dataset from local file or public Hugging Face split."""
     local_path = _get_data_path("MATH-500", "test.json")
     if os.path.exists(local_path):
-        with open(local_path, 'r', encoding='utf-8') as f:
+        with open(local_path, 'r', encoding='utf-8-sig') as f:
             data = json.load(f)
             for item in data:
                 if 'solution' in item and 'answer' not in item:
@@ -67,7 +67,7 @@ def load_gsm8k() -> List[Dict]:
     """Load GSM8K test set from local file or Hugging Face."""
     local_path = _get_data_path("GSM8K", "test.json")
     if os.path.exists(local_path):
-        with open(local_path, 'r', encoding='utf-8') as f:
+        with open(local_path, 'r', encoding='utf-8-sig') as f:
             data = json.load(f)
             return data
 
@@ -103,7 +103,7 @@ def load_aime2024() -> List[Dict]:
     """Load AIME 2024 from local file or public Hugging Face split."""
     local_path = _get_data_path("AIME-2024", "aime2024.json")
     if os.path.exists(local_path):
-        with open(local_path, 'r', encoding='utf-8') as f:
+        with open(local_path, 'r', encoding='utf-8-sig') as f:
             data = json.load(f)
 
         if not isinstance(data, list) or not data:

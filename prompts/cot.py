@@ -31,5 +31,11 @@ def solve_cot(model, tokenizer, problem: str, max_new_tokens: int = 1024) -> str
         Model response with reasoning steps
     """
     prompt = COT_TEMPLATE.format(problem=problem)
-    response = generate_response(model, tokenizer, prompt, max_new_tokens)
+    response = generate_response(
+        model,
+        tokenizer,
+        prompt,
+        max_new_tokens=max_new_tokens,
+        do_sample=False,
+    )
     return response

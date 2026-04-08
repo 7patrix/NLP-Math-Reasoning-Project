@@ -23,6 +23,7 @@ def solve_self_consistency(
     model,
     tokenizer,
     problem: str,
+    dataset_type: str = None,
     num_samples: int = 5,
     max_new_tokens: int = 1024
 ) -> str:
@@ -33,6 +34,7 @@ def solve_self_consistency(
         model: The loaded model
         tokenizer: The tokenizer
         problem: Math problem text
+        dataset_type: Dataset name for answer extraction
         num_samples: Number of reasoning paths to sample (default 5)
         max_new_tokens: Maximum tokens per sample
 
@@ -43,8 +45,16 @@ def solve_self_consistency(
 
     answers = []
     for _ in range(num_samples):
-        response = generate_response(model, tokenizer, prompt, max_new_tokens)
-        answer = extract_final_answer(response, dataset_type="math")
+        response = generate_response(
+            model,
+            tokenizer,
+            prompt,
+            max_new_tokens=max_new_tokens,
+            do_sample=True,
+            temperature=0.7,
+            top_p=0.9,
+        )
+        answer = extract_final_answer(response, dataset_type=dataset_type)
         answers.append((answer, response))
 
     # Majority voting on extracted numerical answers
@@ -54,9 +64,9 @@ def solve_self_consistency(
 
     print(f"[Self-Consistency] {vote_count}/{num_samples} paths agree on answer: {most_common}")
 
-    # Among responses that yield the majority answer, return the shortest
-    # (often the clearest/concisest reasoning path)
+    # Return one representative reasoning path and append a canonical voted answer line.
+    # This keeps the final answer used by evaluation aligned with majority voting.
     majority_responses = [resp for ans, resp in answers if ans == most_common]
     best_response = min(majority_responses, key=len)
 
-    return best_response
+    return f"{best_response}\n\nFinal voted answer: {most_common}\nThe answer is {most_common}"

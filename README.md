@@ -125,17 +125,17 @@ python run_batch.py --id 4
 # 格式: python experiments/runner.py --model <模型> --dataset <数据集> --method <方法>
 
 # 示例: Qwen + MATH-500 + CoT
-python experiments/runner.py --model qwen2.5-math-1.5b --dataset math500 --method cot
+python experiments/runner.py --model qwen2.5-math-1.5b --dataset math500 --method cot --seed 42
 
 # 示例: DeepSeek + GSM8K + Self-Consistency
-python experiments/runner.py --model deepseek-r1-qwen-1.5b --dataset gsm8k --method self_consistency
+python experiments/runner.py --model deepseek-r1-qwen-1.5b --dataset gsm8k --method self_consistency --seed 42
 ```
 
 #### 快速测试（少量样本）
 
 ```bash
 # 用前5条数据快速验证流程，不生成正式结果文件
-python experiments/runner.py --model qwen2.5-math-1.5b --dataset math500 --method cot --limit 5
+python experiments/runner.py --model qwen2.5-math-1.5b --dataset math500 --method cot --limit 5 --seed 42
 ```
 
 #### 查看结果
@@ -156,7 +156,7 @@ python -m streamlit run app.py
 | 1 | Qwen2.5-Math-1.5B | GSM8K | CoT | ~40min | ⏳ |
 | 2 | Qwen2.5-Math-1.5B | GSM8K | Self-Refine | ~80min | ⏳ |
 | 3 | Qwen2.5-Math-1.5B | GSM8K | Self-Consistency | ~200min | ⏳ |
-| 4 | Qwen2.5-Math-1.5B | MATH-500 | CoT | ~15min | ✅ |
+| 4 | Qwen2.5-Math-1.5B | MATH-500 | CoT | ~15min | ⏳ |
 | 5 | Qwen2.5-Math-1.5B | MATH-500 | Self-Refine | ~30min | ⏳ |
 | 6 | Qwen2.5-Math-1.5B | MATH-500 | Self-Consistency | ~75min | ⏳ |
 | 7 | Qwen2.5-Math-1.5B | AIME-2024 | CoT | ~1min | ⏳ |

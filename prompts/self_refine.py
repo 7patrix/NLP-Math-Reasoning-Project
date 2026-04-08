@@ -51,7 +51,13 @@ def solve_self_refine(
     """
     # Initial solution
     initial_prompt = SELF_REFINE_INITIAL.format(problem=problem)
-    solution = generate_response(model, tokenizer, initial_prompt, max_new_tokens)
+    solution = generate_response(
+        model,
+        tokenizer,
+        initial_prompt,
+        max_new_tokens=max_new_tokens,
+        do_sample=False,
+    )
     
     # Iterative refinement
     for i in range(max_iterations):
@@ -59,7 +65,13 @@ def solve_self_refine(
             problem=problem,
             solution=solution
         )
-        refined = generate_response(model, tokenizer, feedback_prompt, max_new_tokens)
+        refined = generate_response(
+            model,
+            tokenizer,
+            feedback_prompt,
+            max_new_tokens=max_new_tokens,
+            do_sample=False,
+        )
         
         # Extract refined solution (after "Feedback and Refined Solution:")
         if "refined solution:" in refined.lower():

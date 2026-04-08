@@ -62,8 +62,7 @@ Implementation note: the CLI model key `deepseek-r1-qwen-1.5b` maps to Hugging F
 
 The 18-experiment plan has been set up in code and execution has started.
 
-- Completed: Experiment ID 4 (Qwen2.5-Math-1.5B + MATH-500 + CoT)
-- Remaining experiments are ready to run through `run_batch.py`.
+- No final benchmark result file has been committed yet in `results/`; the full run is ready to execute via `run_batch.py`.
 
 ## 4. Current Challenges
 
