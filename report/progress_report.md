@@ -1,59 +1,83 @@
-# Progress Report - Mathematical Reasoning with LLMs
+# Mid-Term Progress Report - Mathematical Reasoning Ability of Large Language Models
 
 **Course**: CS6493 Natural Language Processing  
-**Group**: [Group Number]  
+**Project**: Topic 1 - Mathematical Reasoning Ability of Large Language Models  
 **Date**: March 25, 2026
 
-## 1. Introduction
+## 1. Research Background and Objectives
 
-Brief overview of the project goal: evaluating mathematical reasoning capabilities of Qwen2.5-Math-1.5B and DeepSeek-R1-Qwen-1.5B using various prompting strategies.
+Large language models (LLMs) have shown strong performance on general NLP tasks, but mathematical reasoning remains challenging, especially on datasets such as GSM8K, MATH-500, and AIME-2024. This project studies how prompt engineering improves reasoning quality for small-scale (1.5B) math-capable LLMs.
 
-## 2. Related Work
+The project objectives are:
 
-- Chain of Thought (CoT) prompting
-- Self-Refine iterative improvement
-- Self-Consistency majority voting
+1. Build a standardized pipeline for dataset loading and preprocessing for GSM8K, MATH-500, and AIME-2024.
+2. Implement three prompt methods (CoT, Self-Refine, Self-Consistency) under a unified inference/evaluation framework.
+3. Run 18 controlled experiments across 2 models x 3 datasets x 3 prompt methods.
+4. Analyze performance using Accuracy and Average Response Length.
 
-## 3. Methodology
+## 2. Methods and Experimental Design
 
-### 3.1 Models
+### 2.1 Models
+
 - Qwen2.5-Math-1.5B
-- DeepSeek-R1-Qwen-1.5B
+- DeepSeek-R1-Distill-Qwen-1.5B
 
-### 3.2 Datasets
-- MATH-500
-- GSM8K (Test Set)
-- AIME 2024
+Implementation note: the CLI model key `deepseek-r1-qwen-1.5b` maps to Hugging Face model `deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B` in the current codebase.
 
-### 3.3 Prompt Methods (Planned)
+### 2.2 Datasets
+
+- GSM8K test set (~1319 samples), downloaded and normalized via script.
+- MATH-500 (500 samples), currently constructed by downloading `hendrycks/competition_math` test split and taking the first 500 samples.
+- AIME-2024 (30 samples), manually provided local JSON file in `data/AIME-2024/aime2024.json`.
+
+### 2.3 Prompt Methods
+
 1. Chain of Thought (CoT)
-2. Self-Refine
-3. Self-Consistency
+2. Self-Refine (iterative self-feedback refinement)
+3. Self-Consistency (5 sampled reasoning paths with majority voting)
 
-### 3.4 Evaluation Metrics
-- Accuracy
-- Response Length
+### 2.4 Evaluation Metrics
 
-## 4. Preliminary Results
+- Accuracy: ratio of correctly solved problems to total problems.
+- Average Response Length: mean character length of model outputs.
 
-[To be filled after initial experiments]
+## 3. Work Completed So Far
 
-| Model | Dataset | Method | Accuracy | Avg Length |
-|-------|---------|--------|----------|------------|
-| | | | | |
+### 3.1 Environment and Data Pipeline
 
-## 5. Challenges and Solutions
+1. Built a Python 3.10 environment and installed required dependencies.
+2. Implemented automatic data download for GSM8K and MATH-500.
+3. Implemented unified dataset loader with consistent `{"problem", "answer"}` interface.
+4. Added strict AIME-2024 validation to prevent empty/invalid samples from being used.
 
-[Document any issues encountered]
+### 3.2 Core Framework
 
-## 6. Next Steps
+1. Implemented model loader for both model families with configurable cache location.
+2. Implemented CoT, Self-Refine, and Self-Consistency prompt modules.
+3. Implemented experiment runner and batch runner with skip-existing behavior for resume.
+4. Implemented metrics pipeline (answer extraction, normalization, accuracy, response length).
+5. Built a Streamlit UI for single-question testing, result browsing, and comparison.
 
-- Complete all experiments
-- Analyze results
-- Prepare final report
+### 3.3 Experiment Progress
 
-## 7. Division of Labor
+The 18-experiment plan has been set up in code and execution has started.
 
-| Member | Responsibility |
-|--------|---------------|
-| | |
+- Completed: Experiment ID 4 (Qwen2.5-Math-1.5B + MATH-500 + CoT)
+- Remaining experiments are ready to run through `run_batch.py`.
+
+## 4. Current Challenges
+
+1. Runtime efficiency: Self-Consistency is the most expensive setting due to multi-sample decoding.
+2. AIME-style answer matching: high-difficulty competition answers can be brittle under simple normalization.
+3. Prompt specificity: current prompts are general-purpose and can be further specialized by dataset type.
+
+## 5. Next-Step Plan
+
+1. Complete all 18 experiments with multi-machine parallelization when available.
+2. Analyze results by model, dataset, and prompt method.
+3. Improve evaluation robustness for AIME-like answers and run targeted re-check experiments.
+4. Finalize report and presentation materials before the final deadline.
+
+## 6. Mid-Term Summary
+
+The project has completed framework development, data pipeline setup, and initial experiment verification. The current implementation is reproducible and extensible, and is ready for full-scale experiment execution and final analysis.

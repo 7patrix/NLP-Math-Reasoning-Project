@@ -93,12 +93,7 @@ def download_aime2024():
     print(f"AIME-2024 dataset requires manual download.")
     print(f"Please download from official sources and place at: {out_path}")
     print("Expected format: [{\"problem\": \"...\", \"answer\": \"...\"}, ...]")
-
-    # Create a placeholder file for guidance
-    os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    placeholder = [{"problem": "", "answer": ""}]
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(placeholder, f, indent=2)
+    print("No placeholder file will be created. Please provide real AIME-2024 data.")
 
 
 if __name__ == "__main__":

@@ -41,7 +41,7 @@ import torch
 # Local model paths (auto-discovered from cache directory)
 LOCAL_MODEL_PATHS = {
     "qwen2.5-math-1.5b": os.path.join(DEFAULT_CACHE, "hub", "models--Qwen--Qwen2.5-Math-1.5B", "snapshots"),
-    "deepseek-r1-qwen-1.5b": os.path.join(DEFAULT_CACHE, "hub", "models--deepseek-ai--DeepSeek-R1-Distill-Qwen-1.5B", "snapshots"),
+    "deepseek-r1-qwen-1.5b": os.path.join(DEFAULT_CACHE, "hub", "models--deepseek-ai--DeepSeek-R1-Qwen-1.5B", "snapshots"),
 }
 
 MODEL_CONFIGS = {
@@ -50,7 +50,7 @@ MODEL_CONFIGS = {
         "device": "cuda" if torch.cuda.is_available() else "cpu",
     },
     "deepseek-r1-qwen-1.5b": {
-        "name": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+        "name": "deepseek-ai/DeepSeek-R1-Qwen-1.5B",
         "device": "cuda" if torch.cuda.is_available() else "cpu",
     }
 }

@@ -100,7 +100,32 @@ def load_aime2024() -> List[Dict]:
     local_path = _get_data_path("AIME-2024", "aime2024.json")
     if os.path.exists(local_path):
         with open(local_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            data = json.load(f)
+
+        if not isinstance(data, list) or not data:
+            raise RuntimeError(
+                f"Invalid AIME-2024 file at {local_path}: expected a non-empty list of samples."
+            )
+
+        invalid_indices = []
+        for idx, item in enumerate(data):
+            if not isinstance(item, dict):
+                invalid_indices.append(idx)
+                continue
+
+            problem = str(item.get("problem", "")).strip()
+            answer = str(item.get("answer", "")).strip()
+            if not problem or not answer:
+                invalid_indices.append(idx)
+
+        if invalid_indices:
+            preview = ", ".join(str(i) for i in invalid_indices[:10])
+            raise RuntimeError(
+                "Invalid AIME-2024 samples found (missing/empty 'problem' or 'answer') "
+                f"at indices: {preview}."
+            )
+
+        return data
 
     print(f"[WARNING] AIME-2024 data not found at {local_path}")
     print("[WARNING] Please download manually and place at data/AIME-2024/aime2024.json")
